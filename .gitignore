@@ -1,0 +1,6 @@
+# Unneeded documentation
+*.pdf
+*.png
+
+# Obsidian user-specific config
+.obsidian/
