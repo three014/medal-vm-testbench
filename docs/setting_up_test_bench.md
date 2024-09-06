@@ -1,3 +1,5 @@
+# Setting up a repeatable test bench
+
 While we do have access to a cluster of raspberry pis to test out our software, the act of resetting the pis to a state where we can repeat experiments takes a bit of time to complete. 
 
 To solve this, I'm working with a virtual cluster using the Libvirt stack to provision new VMs on my host machine. Here's the specs of my machine, as well as the versions of Libvirt and QEMU:
@@ -48,7 +50,7 @@ network_vnet1:
 		forward_mode: nat
 	ipv4_addr: 10.0.50.46
 ```
-The full XML configuration can be found [[medal-test04.dump.xml|here]]. 
+The full XML configuration can be found [here](../resources/medal-test04.dump.xml).
 
 To initialize each machine, I use a cloud-init config that looks pretty close to this:
 ```
@@ -74,4 +76,4 @@ runcmd:
   - restart sshd
 ```
 
-It gets tedious to have to create the right directories, copy the Ubuntu image to the new directories and resize it to 32gib, write out the cloud-config and generate the resulting image, then install the new virtual machine. To alleviate this problem, I created a few helper scripts, which can be found in my github repository here.
+It gets tedious to have to create the right directories, copy the Ubuntu image to the new directories and resize it to 32gib, write out the cloud-config and generate the resulting image, then install the new virtual machine. To alleviate this problem, I created a few helper scripts, which can be found in the repository this document came from.
