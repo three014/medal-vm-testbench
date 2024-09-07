@@ -38,6 +38,8 @@ num="$1"
 key_name="$2"
 ssh_pub_key_path="$HOME_DIR/.ssh/keys/$key_name.pub"
 
+mkdir -p /var/lib/libvirt/images/medal
+
 if [ -d "/var/lib/libvirt/images/medal/test${num}" ]; then
   if [ -f "/var/lib/libvirt/images/medal/test${num}/test${num}.qcow2" ]; then
     die "Test number already exists"
@@ -83,8 +85,6 @@ qemu-img resize /var/lib/libvirt/images/medal/test${num}/test${num}.qcow2 32G
   -u /tmp/user-data \
   -m /tmp/meta-data
 
-  
-
 virt-install \
   --connect qemu:///system \
   --virt-type kvm \
@@ -105,22 +105,14 @@ if [ $? -ne 0 ]; then
   die "Failed to create VM"
 fi
 
-echo "Waiting for dnsmasq to give our new VM an ip address..."
-sleep 10s
-
-ip_addr=$(virsh domifaddr medal-test${num} | awk '/vnet/ {print $4}')
-ip_addr=${ip_addr%/[0-9][0-9]}
-
-if [[ ip_addr != "" ]]; then
-  cat >> "$HOME_DIR/.ssh/config" <<EOF
+cat >> "$HOME_DIR/.ssh/config" <<EOF
 
 Host medal-test${num}
-    HostName ${ip_addr}
+    HostName medal-test${num}.medal.lan
     User cc
     IdentityFile ~/.ssh/keys/${key_name}
 EOF
 
-  echo "Added ip address to ssh config"
-fi
+echo "Added new entry to ssh config"
 
   
