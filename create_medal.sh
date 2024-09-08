@@ -9,7 +9,7 @@ export PATH="${SELF%/*}:$PATH"
 
 PROGRAM="${0##*/}"
 ARGS=( "$@" )
-HOME_DIR="$HOME"
+HOME_DIR="/home/$(logname)"
 
 usage() {
   echo "`basename $0` [NUM] [SSH_KEY_NAME]"
@@ -61,6 +61,18 @@ package_upgrade: true
 packages:
   - git
   - python3-pip
+  - ansible
+
+write_files:
+ - path: /usr/sbin/hostmod.sh
+   permissions: 0744
+   owner: root
+   content: |
+     #!/bin/bash
+
+     cat >>/etc/hosts <<EOF
+     127.0.0.1 medal-test${num}
+     EOF
 
 users:
   - name: cc
@@ -72,7 +84,9 @@ users:
 
 runcmd:
   - echo "AllowUsers cc" >> /etc/ssh/sshd_config
+  - echo "AddressFamily inet" >> /etc/ssh/ssh_config
   - restart sshd
+  - bash /usr/sbin/hostmod.sh
 EOF
 
 mkdir -p /var/lib/libvirt/images/medal/test${num}
@@ -110,6 +124,7 @@ cat >> "$HOME_DIR/.ssh/config" <<EOF
 Host medal-test${num}
     HostName medal-test${num}.medal.lan
     User cc
+    AddressFamily inet
     IdentityFile ~/.ssh/keys/${key_name}
 EOF
 
