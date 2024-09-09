@@ -12,7 +12,7 @@ ARGS=( "$@" )
 HOME_DIR="/home/$(logname)"
 
 usage() {
-  echo "`basename $0` [NUM] [SSH_KEY_NAME]"
+  echo "$PROGRAM [NUM] [SSH_KEY_NAME]"
 }
 
 # Shamelessly stolen from the wireguard wg-quick script...

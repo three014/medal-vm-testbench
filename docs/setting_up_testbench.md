@@ -46,7 +46,7 @@ network_vnet1:
   type: virtio
   network: 
     name: medal 
-    ipv4_cidr: (10.0.50.0/26)
+    ipv4_cidr: (10.0.50.0/24)
     forward_mode: nat
   ipv4_addr: 10.0.50.46
 ```
@@ -62,6 +62,7 @@ package_upgrade: true
 packages:
   - git
   - python3-pip
+  - ansible
 
 users:
   - name: cc
