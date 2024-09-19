@@ -10,6 +10,7 @@ export PATH="${SELF%/*}:$PATH"
 PROGRAM="${0##*/}"
 ARGS=( "$@" )
 HOME_DIR="/home/$(logname)"
+MEDAL_DIR="/var/lib/libvirt/images/medal"
 
 usage() {
   echo "$PROGRAM [NUM] [SSH_KEY_NAME]"
@@ -36,12 +37,10 @@ fi
 
 num="$1"
 key_name="$2"
-ssh_pub_key_path="$HOME_DIR/.ssh/keys/$key_name.pub"
+ssh_pub_key_path="$HOME_DIR/.ssh/keys/medal/$key_name.pub"
 
-mkdir -p /var/lib/libvirt/images/medal
-
-if [ -d "/var/lib/libvirt/images/medal/test${num}" ]; then
-  if [ -f "/var/lib/libvirt/images/medal/test${num}/test${num}.qcow2" ]; then
+if [ -d "$MEDAL_DIR/test${num}" ]; then
+  if [ -f "$MEDAL_DIR/test${num}/test${num}.qcow2" ]; then
     die "Test number already exists"
   fi
 fi
@@ -89,13 +88,14 @@ runcmd:
   - bash /usr/sbin/hostmod.sh
 EOF
 
-mkdir -p /var/lib/libvirt/images/medal/test${num}
-qemu-img create -f qcow2 -F qcow2 -o backing_file=/var/lib/libvirt/images/base/focal-server-cloudimg-amd64.img \
-  /var/lib/libvirt/images/medal/test${num}/test${num}.qcow2
-qemu-img resize /var/lib/libvirt/images/medal/test${num}/test${num}.qcow2 32G
+mkdir -p "$MEDAL_DIR/test${num}"
+qemu-img create -f qcow2 -F qcow2 \
+  -o backing_file="$MEDAL_DIR/base/focal-server-cloudimg-amd64.img" \
+  "$MEDAL_DIR/test${num}/test${num}.qcow2"
+qemu-img resize "$MEDAL_DIR/test${num}/test${num}.qcow2" 32G
 
 ./gen_cloud_init.sh \
-  -o /var/lib/libvirt/images/medal/test${num}/test${num}-cidata.iso \
+  -o "$MEDAL_DIR/test${num}/test${num}-cidata.iso" \
   -u /tmp/user-data \
   -m /tmp/meta-data
 
@@ -107,8 +107,8 @@ virt-install \
   --memory 4096 \
   --vcpus=4 \
   --os-variant ubuntu20.04 \
-  --disk path=/var/lib/libvirt/images/medal/test${num}/test${num}.qcow2,format=qcow2 \
-  --disk /var/lib/libvirt/images/medal/test${num}/test${num}-cidata.iso,device=cdrom \
+  --disk path="$MEDAL_DIR/test${num}/test${num}.qcow2",format=qcow2 \
+  --disk "$MEDAL_DIR/test${num}/test${num}-cidata.iso",device=cdrom \
   --import \
   --network network=medal \
   --noautoconsole
@@ -125,7 +125,7 @@ Host medal-test${num}
     HostName medal-test${num}.medal.lan
     User cc
     AddressFamily inet
-    IdentityFile ~/.ssh/keys/${key_name}
+    IdentityFile ~/.ssh/keys/medal/${key_name}
 EOF
 
 echo "Added new entry to ssh config"
