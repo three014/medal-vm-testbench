@@ -1,0 +1,3 @@
+[submodule "medal-ansible"]
+	path = medal-ansible
+	url = https://github.com/three014/medal-ansible
