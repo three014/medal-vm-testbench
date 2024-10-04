@@ -77,10 +77,10 @@ yes_or_no() {
 }
 
 install_deps() {
-  apt update && apt install -y qemu-kvm libvirt-daemon-system genisoimage virtinst systemd-resolved
+  apt update && apt install -y qemu-kvm libvirt-daemon-system genisoimage virtinst systemd-resolved || die "Failed to install dependencies"
   usermod -aG libvirt "$(logname)"
   mkdir -p /etc/systemd/system/libvirtd.socket.d
-  cat <<EOF >>/etc/systemd/system/libvirtd.socket.d/override.conf
+  cat <<EOF >/etc/systemd/system/libvirtd.socket.d/enable_libvirt_group.conf
 [Socket]
 SocketMode=0660
 SocketGroup=libvirt
@@ -114,9 +114,11 @@ create_medal_network() {
   </ip>
 </network>
 EOF
-  virsh --connect qemu:///system net-define "${LIBVIRT_DIR}/network/medal.xml"
-  virsh --connect qemu:///system net-autostart medal
-  virsh --connect qemu:///system net-start medal
+  cat <<EOF | virsh --connect qemu:///system -q
+net-define "${LIBVIRT_DIR}/network/medal.xml"
+net-autostart medal
+net-start medal
+EOF
 }
 
 download_base_image() {
@@ -130,7 +132,6 @@ if $non_interactive || yes_or_no "$PROMPT"; then
   auto_su
   # echo "Debug: Installer commands has been commented out for safety"
   install_deps
-  newgrp libvirt
   create_required_directories
   create_medal_network
   download_base_image

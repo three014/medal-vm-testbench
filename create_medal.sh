@@ -39,8 +39,8 @@ num="$1"
 key_name="$2"
 ssh_pub_key_path="$HOME_DIR/.ssh/keys/medal/$key_name.pub"
 
-if [ -d "$MEDAL_DIR/test${num}" ]; then
-  if [ -f "$MEDAL_DIR/test${num}/test${num}.qcow2" ]; then
+if [ -d "$MEDAL_DIR/test/test${num}" ]; then
+  if [ -f "$MEDAL_DIR/test/test${num}/test${num}.qcow2" ]; then
     die "Test number already exists"
   fi
 fi
@@ -70,7 +70,7 @@ write_files:
      #!/bin/bash
 
      cat >>/etc/hosts <<EOF
-     127.0.0.1 medal-test${num}
+     127.0.0.1 medal-test${num}.medal.lan medal-test${num}
      EOF
 
 users:
@@ -88,14 +88,14 @@ runcmd:
   - bash /usr/sbin/hostmod.sh
 EOF
 
-mkdir -p "$MEDAL_DIR/test${num}"
+mkdir -p "$MEDAL_DIR/test/test${num}"
 qemu-img create -f qcow2 -F qcow2 \
   -o backing_file="$MEDAL_DIR/base/focal-server-cloudimg-amd64.img" \
-  "$MEDAL_DIR/test${num}/test${num}.qcow2"
-qemu-img resize "$MEDAL_DIR/test${num}/test${num}.qcow2" 32G
+  "$MEDAL_DIR/test/test${num}/test${num}.qcow2"
+qemu-img resize "$MEDAL_DIR/test/test${num}/test${num}.qcow2" 32G
 
 ./gen_cloud_init.sh \
-  -o "$MEDAL_DIR/test${num}/test${num}-cidata.iso" \
+  -o "$MEDAL_DIR/test/test${num}/test${num}-cidata.iso" \
   -u /tmp/user-data \
   -m /tmp/meta-data
 
@@ -107,8 +107,8 @@ virt-install \
   --memory 4096 \
   --vcpus=4 \
   --os-variant ubuntu20.04 \
-  --disk path="$MEDAL_DIR/test${num}/test${num}.qcow2",format=qcow2 \
-  --disk "$MEDAL_DIR/test${num}/test${num}-cidata.iso",device=cdrom \
+  --disk path="$MEDAL_DIR/test/test${num}/test${num}.qcow2",format=qcow2 \
+  --disk "$MEDAL_DIR/test/test${num}/test${num}-cidata.iso",device=cdrom \
   --import \
   --network network=medal \
   --noautoconsole
@@ -122,7 +122,7 @@ fi
 cat >> "$HOME_DIR/.ssh/config" <<EOF
 
 Host medal-test${num}
-    HostName medal-test${num}.medal.lan
+    HostName medal-test${num}
     User cc
     AddressFamily inet
     IdentityFile ~/.ssh/keys/medal/${key_name}

@@ -13,11 +13,12 @@ auto_su() {
 
 num=$1
 
+ssh-keygen -f "$HOME_DIR/.ssh/known_hosts" -R "medal-test${num}"
+
 auto_su
 virsh --connect qemu:///system shutdown --domain medal-test${num}
-sleep 5s
-virsh --connect qemu:///system undefine --domain medal-test${num} --snapshots-metadata --delete-storage-volume-snapshots
-rm -r /var/lib/libvirt/images/medal/test${num} 
-ssh-keygen -f "$HOME_DIR/.ssh/known_hosts" -R "medal-test${num}.medal.lan"
+sleep 7s
+virsh --connect qemu:///system undefine --domain medal-test${num} --remove-all-storage
+rm -r /var/lib/libvirt/images/medal/test/test${num} 
 
 
