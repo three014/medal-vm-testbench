@@ -1,3 +1,7 @@
+**THIS DOC IS DEPRECATED**
+
+
+
 # We love virtual machines!
 
 While we do have access to a cluster of raspberry pis to test out our software, the act of resetting the pis to a state where we can repeat experiments takes a bit of time to complete. 

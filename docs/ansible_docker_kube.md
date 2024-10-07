@@ -10,18 +10,14 @@ Without further ado, let's get started!
 
 ## Download the playbook
 
-The cloud config found in [`create_medal.sh`](../create_medal.sh) has entries to install Git, Ansible, and the Pip installer on all new VMs, but for now, the user has to manually clone the [Git repository that contains the Ansible playbook](https://github.com/WillClfrd/kube-pi-automation/tree/ansible_stuff) (look for the "ansible_stuff" branch):
+The cloud config found in [`create_medal.sh`](../create_medal.sh) has entries to install Git, Ansible, and the Pip installer on all new VMs. The ansible playbooks are found in the `medal-ansible` submodule, and can be copied to the any of the VMs with the `copy_ansible_to_master.sh` script. 
 
-```
-git clone git@github.com:WillClfrd/kube-pi-automation.git
-cd kube-pi-automation
-git checkout ansible_stuff
-cd ansible
-```
+## Inside `medal-ansible`
 
-Optionally, the user can edit the inventory file to include all the desired VMs. New VMs have a FQDN that follows the `medal-testXX.medal.lan` format, where "XX" is the number assigned by the user when they ran `create_medal.sh` with "XX" as the first argument.
+The user can edit the inventory file to include all the desired VMs. New VMs have a FQDN that follows the `medal-testXX.medal.lan` format, where "XX" is the number assigned by the user when they ran `create_medal.sh` with "XX" as the first argument.
 
 A sample inventory file:
+
 ```
 [worker]
 medal-test[02:03]
@@ -34,10 +30,10 @@ worker
 master
 ```
 
-Also, the user needs take the private key that was used to connect to the VMs and copy it to the "main" VM. By default this would be `medal-test01.medal.lan`, but it can be any of the VMs as long as the user edits the included `inventory.ini` file to mark the "main" node. This private key will be used by the main VM to SSH into the other VMs and run the Ansible playbook.
+By default, the "master" kube node will be `medal-test01`, but the user can change this to which node they want.
 
-Once that's done, `cd` into the folder containing the Ansible playbook and inventory file, and run
+The playbook can be run from the master VM with this command:
 
 ```
-ansible-playbook -i inventory.ini playbook.yaml --private-key [PATH_TO_SSH_KEY]
+ansible-playbook -i inventory.ini bugs/[NAME_OF_PLAYBOOK] --private-key [PATH_TO_SSH_KEY]
 ```
